@@ -20,6 +20,9 @@ jobs:
         with:
           node-version: 20
 
+      - name: Install setuptools
+        run: pip install setuptools
+
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
