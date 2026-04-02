@@ -1,6 +1,6 @@
 {
   "name": "gustoosx",
-  "version": "0.1.5",
+  "version": "0.1.7",
   "description": "Slim macOS-only Bar POS — local-first, offline-ready",
   "main": "dist/main.cjs",
   "type": "module",
@@ -10,7 +10,9 @@
     "dev:main": "wait-on http://localhost:5173 && cross-env NODE_ENV=development electron dist/main.cjs",
     "build": "tsc --noEmit && vite build",
     "build:main": "node build-main.mjs",
-    "package": "electron-builder --mac --x64",
+    "package": "electron-builder --mac",
+    "package:x64": "electron-builder --mac --x64",
+    "package:arm64": "electron-builder --mac --arm64",
     "package:universal": "electron-builder --mac --universal",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx src/db/migrate.ts",
