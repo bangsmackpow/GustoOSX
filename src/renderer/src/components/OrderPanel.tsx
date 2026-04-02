@@ -1,12 +1,14 @@
 import { useState, useMemo } from "react";
 import { useStore } from "../store";
-import { Trash2, Printer, CreditCard, Banknote, ShieldAlert } from "lucide-react";
+import { Trash2, Printer, CreditCard, Banknote, ShieldAlert, Settings2 } from "lucide-react";
+import { TabManagementModal } from "./TabManagementModal";
 
 export function OrderPanel() {
   const { currentUser, currentTabId, tabs, orders, removeOrder, voidOrder, closeTab } = useStore();
   const [isProcessing, setIsProcessing] = useState(false);
   const [showVoidPin, setShowVoidPin] = useState<string | null>(null);
   const [voidPin, setVoidPin] = useState("");
+  const [showTabMgmt, setShowTabMgmt] = useState(false);
 
   const currentTab = useMemo(() => tabs.find((t) => t.id === currentTabId), [tabs, currentTabId]);
   const activeOrders = useMemo(() => orders.filter((o) => !o.voided), [orders]);
@@ -120,7 +122,15 @@ export function OrderPanel() {
     <div className="w-80 bg-pos-surface border-l border-pos-border flex flex-col shadow-2xl">
       {/* Tab header */}
       <div className="p-4 border-b border-pos-border bg-pos-bg/50">
-        <h2 className="font-semibold text-lg text-pos-accent">{currentTab.nickname}</h2>
+        <div className="flex items-center justify-between">
+          <h2 className="font-semibold text-lg text-pos-accent">{currentTab.nickname}</h2>
+          <button 
+            onClick={() => setShowTabMgmt(true)}
+            className="p-2 hover:bg-pos-surface rounded-xl text-pos-text-muted hover:text-pos-accent transition-all"
+          >
+            <Settings2 className="w-4 h-4" />
+          </button>
+        </div>
         <div className="flex justify-between items-center mt-1">
           <p className="text-[10px] text-pos-text-muted uppercase tracking-wider">
             {activeOrders.length} item{activeOrders.length !== 1 ? "s" : ""}
@@ -151,6 +161,11 @@ export function OrderPanel() {
                     {order.quantity > 1 && <span className="text-pos-accent mr-1">{order.quantity}x</span>}
                     {order.drinkName}
                   </p>
+                  {order.modifiers && (
+                    <p className="text-[10px] text-pos-accent/70 font-bold uppercase tracking-tighter mt-0.5">
+                      {JSON.parse(order.modifiers).map((m: any) => m.name).join(", ")}
+                    </p>
+                  )}
                   <p className="text-[11px] text-pos-text-muted mt-0.5">
                     ${order.unitPrice.toFixed(2)} each
                   </p>
@@ -252,6 +267,14 @@ export function OrderPanel() {
           <span>Print Guest Check</span>
         </button>
       </div>
+
+      {showTabMgmt && (
+        <TabManagementModal 
+          tab={currentTab} 
+          orders={orders} 
+          onClose={() => setShowTabMgmt(false)} 
+        />
+      )}
     </div>
   );
 }

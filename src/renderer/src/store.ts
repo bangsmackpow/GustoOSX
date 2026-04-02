@@ -37,6 +37,7 @@ export interface OrderItem {
   drinkName: string;
   quantity: number;
   unitPrice: number;
+  modifiers?: string; // JSON string
   notes?: string;
   voided: boolean;
 }
@@ -57,6 +58,7 @@ interface AppState {
   setTabs: (tabs: Tab[]) => void;
   setCurrentTab: (tabId: string | null) => void;
   addTab: (tab: Tab) => void;
+  updateTab: (tabId: string, updates: Partial<Tab>) => void;
   closeTab: (tabId: string) => void;
   setOrders: (orders: OrderItem[]) => void;
   addOrder: (item: OrderItem) => void;
@@ -83,6 +85,10 @@ export const useStore = create<AppState>((set) => ({
   setTabs: (tabs) => set({ tabs }),
   setCurrentTab: (tabId) => set({ currentTabId: tabId }),
   addTab: (tab) => set((state) => ({ tabs: [...state.tabs, tab], currentTabId: tab.id })),
+  updateTab: (tabId, updates) => 
+    set((state) => ({
+      tabs: state.tabs.map((t) => t.id === tabId ? { ...t, ...updates } : t)
+    })),
   closeTab: (tabId) =>
     set((state) => ({
       tabs: state.tabs.filter((t) => t.id !== tabId),
