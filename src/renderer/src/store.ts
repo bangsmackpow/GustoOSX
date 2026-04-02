@@ -23,6 +23,8 @@ export interface Drink {
 export interface Tab {
   id: string;
   nickname: string;
+  tableNumber?: string;
+  keepCard: boolean;
   status: "open" | "closed";
   staffUserId: string;
   totalAmount: number;
@@ -35,6 +37,7 @@ export interface OrderItem {
   tabId: string;
   drinkId: string;
   drinkName: string;
+  drinkNameEs?: string;
   quantity: number;
   unitPrice: number;
   modifiers?: string; // JSON string

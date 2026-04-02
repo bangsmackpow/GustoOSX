@@ -1,10 +1,10 @@
 import { useState, useMemo } from "react";
 import { useStore } from "../store";
-import { Trash2, Printer, CreditCard, Banknote, ShieldAlert, Settings2 } from "lucide-react";
+import { Trash2, Printer, CreditCard, Banknote, ShieldAlert, Settings2, CreditCardIcon } from "lucide-react";
 import { TabManagementModal } from "./TabManagementModal";
 
 export function OrderPanel() {
-  const { currentUser, currentTabId, tabs, orders, removeOrder, voidOrder, closeTab } = useStore();
+  const { currentUser, currentTabId, tabs, orders, removeOrder, voidOrder, closeTab, language, updateTab } = useStore();
   const [isProcessing, setIsProcessing] = useState(false);
   const [showVoidPin, setShowVoidPin] = useState<string | null>(null);
   const [voidPin, setVoidPin] = useState("");
@@ -14,22 +14,38 @@ export function OrderPanel() {
   const activeOrders = useMemo(() => orders.filter((o) => !o.voided), [orders]);
   const total = useMemo(() => activeOrders.reduce((sum, o) => sum + o.unitPrice * o.quantity, 0), [activeOrders]);
 
+  const toggleKeepCard = async () => {
+    if (!currentTabId || !currentTab) return;
+    const newValue = !currentTab.keepCard;
+    const result = await window.api.db.run("UPDATE tabs SET keep_card = ? WHERE id = ?", [newValue ? 1 : 0, currentTabId]);
+    if (result.success) {
+      updateTab(currentTabId, { keepCard: newValue });
+    }
+  };
+
   const handlePrint = async () => {
     if (!currentTab) return;
+    const isEs = language === "es";
+    
     const lines = [
       "================================",
-      currentTab.nickname || "Tab",
-      new Date().toLocaleString(),
+      currentTab.nickname || (isEs ? "Cuenta" : "Tab"),
+      new Date().toLocaleString(isEs ? "es-MX" : "en-US"),
       "--------------------------------",
-      ...activeOrders.flatMap((o) => [
-        `${o.quantity}x ${o.drinkName}`,
-        `   $${(o.unitPrice * o.quantity).toFixed(2)}`,
-      ]),
+      ...activeOrders.flatMap((o) => {
+        const name = (isEs && o.drinkNameEs) ? o.drinkNameEs : o.drinkName;
+        const mods = o.modifiers ? JSON.parse(o.modifiers).map((m: any) => isEs && m.nameEs ? m.nameEs : m.name).join(", ") : "";
+        
+        const orderLines = [`${o.quantity}x ${name}`];
+        if (mods) orderLines.push(`   (${mods})`);
+        orderLines.push(`   $${(o.unitPrice * o.quantity).toFixed(2)}`);
+        return orderLines;
+      }),
       "--------------------------------",
-      `TOTAL: $${total.toFixed(2)}`,
+      `${isEs ? "TOTAL" : "TOTAL"}: $${total.toFixed(2)}`,
       "================================",
       "",
-      "   THANK YOU!",
+      isEs ? "   ¡MUCHAS GRACIAS!   " : "   THANK YOU!   ",
       "",
     ];
     await window.api.printer.printReceipt(lines);
@@ -124,12 +140,26 @@ export function OrderPanel() {
       <div className="p-4 border-b border-pos-border bg-pos-bg/50">
         <div className="flex items-center justify-between">
           <h2 className="font-semibold text-lg text-pos-accent">{currentTab.nickname}</h2>
-          <button 
-            onClick={() => setShowTabMgmt(true)}
-            className="p-2 hover:bg-pos-surface rounded-xl text-pos-text-muted hover:text-pos-accent transition-all"
-          >
-            <Settings2 className="w-4 h-4" />
-          </button>
+          <div className="flex items-center gap-1">
+            <button 
+              onClick={toggleKeepCard}
+              className={`p-2 rounded-xl transition-all flex items-center gap-2 ${
+                currentTab.keepCard 
+                  ? "bg-pos-accent text-black" 
+                  : "hover:bg-pos-surface text-pos-text-muted"
+              }`}
+              title={currentTab.keepCard ? "Holding Card" : "Hold Card?"}
+            >
+              <CreditCardIcon className="w-4 h-4" />
+              {currentTab.keepCard && <span className="text-[8px] font-black uppercase">Holding</span>}
+            </button>
+            <button 
+              onClick={() => setShowTabMgmt(true)}
+              className="p-2 hover:bg-pos-surface rounded-xl text-pos-text-muted hover:text-pos-accent transition-all"
+            >
+              <Settings2 className="w-4 h-4" />
+            </button>
+          </div>
         </div>
         <div className="flex justify-between items-center mt-1">
           <p className="text-[10px] text-pos-text-muted uppercase tracking-wider">

@@ -67,6 +67,8 @@ export const tabs = sqliteTable("tabs", {
   status: text("status", { enum: ["open", "closed", "transferred"] }).notNull().default("open"),
   staffUserId: text("staff_user_id").notNull().references(() => users.id),
   shiftId: text("shift_id").references(() => shifts.id),
+  tableNumber: text("table_number"),
+  keepCard: integer("keep_card", { mode: "boolean" }).notNull().default(false),
   totalAmount: real("total_amount").notNull().default(0),
   paymentMethod: text("payment_method", { enum: ["cash", "card", "split"] }),
   notes: text("notes"),

@@ -4,6 +4,8 @@ import { MenuGrid } from "./MenuGrid";
 import { OrderPanel } from "./OrderPanel";
 import { TabBar } from "./TabBar";
 import { ReportsView } from "./ReportsView";
+import { InventoryView } from "./InventoryView";
+import { StaffView } from "./StaffView";
 import { WindowControls } from "./WindowControls";
 import { QuickSearch } from "./QuickSearch";
 import {
@@ -52,7 +54,17 @@ export function POSLayout() {
 
   const loadDrinks = async () => {
     try {
-      const result = await window.api.db.query("SELECT * FROM drinks WHERE is_available = 1 ORDER BY category, name", []);
+      const result = await window.api.db.query(`
+        SELECT d.*, 
+        EXISTS (
+          SELECT 1 FROM recipe_ingredients ri 
+          JOIN ingredients i ON ri.ingredient_id = i.id 
+          WHERE ri.drink_id = d.id AND i.current_stock <= i.minimum_stock
+        ) as is_low_stock
+        FROM drinks d 
+        WHERE d.is_available = 1 
+        ORDER BY d.category, d.name
+      `, []);
       if (result.success) {
         setDrinks(result.data || []);
       }
@@ -198,6 +210,10 @@ export function POSLayout() {
             </>
           ) : activeView === "reports" ? (
             <ReportsView />
+          ) : activeView === "inventory" ? (
+            <InventoryView />
+          ) : activeView === "staff" ? (
+            <StaffView />
           ) : (
             <div className="flex-1 flex items-center justify-center bg-pos-bg p-8">
               <div className="max-w-md w-full text-center space-y-6">

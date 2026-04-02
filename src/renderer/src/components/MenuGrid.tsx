@@ -32,6 +32,7 @@ export function MenuGrid({ drinks }: MenuGridProps) {
       tabId: currentTabId,
       drinkId: drink.id,
       drinkName: drink.name,
+      drinkNameEs: (drink as any).name_es,
       quantity: 1,
       unitPrice: unitPrice,
       modifiers: modifiers.length > 0 ? JSON.stringify(modifiers) : undefined,
@@ -39,8 +40,8 @@ export function MenuGrid({ drinks }: MenuGridProps) {
     };
 
     const result = await window.api.db.run(
-      "INSERT INTO orders (id, tab_id, drink_id, drink_name, quantity, unit_price, modifiers, voided, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-      [newOrder.id, newOrder.tabId, newOrder.drinkId, newOrder.drinkName, newOrder.quantity, newOrder.unitPrice, newOrder.modifiers || null, 0, Math.floor(Date.now() / 1000)]
+      "INSERT INTO orders (id, tab_id, drink_id, drink_name, drink_name_es, quantity, unit_price, modifiers, voided, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+      [newOrder.id, newOrder.tabId, newOrder.drinkId, newOrder.drinkName, newOrder.drinkNameEs || null, newOrder.quantity, newOrder.unitPrice, newOrder.modifiers || null, 0, Math.floor(Date.now() / 1000)]
     );
 
     if (result.success) {
@@ -72,6 +73,11 @@ export function MenuGrid({ drinks }: MenuGridProps) {
                   <h3 className="font-black text-sm text-pos-text group-hover:text-pos-accent transition-colors leading-tight uppercase tracking-tight">
                     {drink.name}
                   </h3>
+                  {(drink as any).is_low_stock ? (
+                    <span className="bg-pos-danger/20 text-pos-danger text-[8px] font-black px-1.5 py-0.5 rounded uppercase tracking-widest border border-pos-danger/30">
+                      Low
+                    </span>
+                  ) : null}
                 </div>
                 {drink.description && (
                   <p className="text-[10px] text-pos-text-muted line-clamp-2 mt-1 leading-relaxed font-medium">
