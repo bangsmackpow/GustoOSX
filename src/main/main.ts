@@ -1,10 +1,12 @@
 import { app, BrowserWindow, ipcMain, dialog } from "electron";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
-import { createDb } from "./db/index.js";
+import { createDb } from "../db/index.js";
 import { hardwareService } from "./services/hardware.js";
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
+// Safe __dirname for both ESM and CJS
+const _filename = fileURLToPath(import.meta.url);
+const _dirname = dirname(_filename);
 
 let mainWindow: BrowserWindow | null = null;
 const isDev = process.env.NODE_ENV === "development";
@@ -20,7 +22,7 @@ function createWindow() {
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
-      preload: join(__dirname, "preload.cjs"),
+      preload: join(_dirname, "preload.cjs"),
     },
   });
 
@@ -28,7 +30,8 @@ function createWindow() {
     mainWindow.loadURL("http://localhost:5173");
     mainWindow.webContents.openDevTools({ mode: "detach" });
   } else {
-    mainWindow.loadFile(join(__dirname, "public", "index.html"));
+    // In production, the renderer is built into dist/public
+    mainWindow.loadFile(join(_dirname, "public", "index.html"));
   }
 
   mainWindow.on("closed", () => {
@@ -41,7 +44,7 @@ app.whenReady().then(() => {
   const db = createDb();
 
   // IPC handlers
-  ipcMain.handle("db:query", async (_event, query: string, params: unknown[]) => {
+  ipcMain.handle("db:query", async (_event, query, params) => {
     try {
       return { success: true, data: db.query(query, params) };
     } catch (error) {
@@ -49,7 +52,7 @@ app.whenReady().then(() => {
     }
   });
 
-  ipcMain.handle("db:run", async (_event, query: string, params: unknown[]) => {
+  ipcMain.handle("db:run", async (_event, query, params) => {
     try {
       db.run(query, params);
       return { success: true };
@@ -58,7 +61,7 @@ app.whenReady().then(() => {
     }
   });
 
-  ipcMain.handle("auth:login", async (_event, pin: string) => {
+  ipcMain.handle("auth:login", async (_event, pin) => {
     try {
       const result = db.query(`SELECT * FROM users WHERE pin = ? AND is_active = 1`, [pin]);
       if (result.length > 0) {
@@ -70,7 +73,7 @@ app.whenReady().then(() => {
     }
   });
 
-  ipcMain.handle("inventory:deduct", async (_event, ingredientId: string, amount: number) => {
+  ipcMain.handle("inventory:deduct", async (_event, ingredientId, amount) => {
     try {
       db.run(`UPDATE ingredients SET current_stock = current_stock - ?, updated_at = unixepoch() WHERE id = ?`, [amount, ingredientId]);
       return { success: true };
@@ -89,7 +92,7 @@ app.whenReady().then(() => {
   });
 
   // Hardware IPC
-  ipcMain.handle("printer:print-receipt", async (_event, lines: string[]) => {
+  ipcMain.handle("printer:print-receipt", async (_event, lines) => {
     return hardwareService.printReceipt(lines);
   });
 

@@ -4,7 +4,9 @@ import { join, dirname } from "path";
 import { fileURLToPath } from "url";
 import * as schema from "./schema/index.js";
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
+// Use import.meta.url directly, esbuild polyfills it via the banner/define config
+const _filename = fileURLToPath(import.meta.url);
+const _dirname = dirname(_filename);
 
 function getDbPath(): string {
   if (process.env.NODE_ENV === "development") {
