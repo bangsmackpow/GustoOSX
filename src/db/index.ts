@@ -2,7 +2,7 @@ import { drizzle } from "drizzle-orm/better-sqlite3";
 import Database from "better-sqlite3";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
-import * as schema from "./schema/index.js";
+import * as schema from "./schema/index";
 
 // Use import.meta.url directly, esbuild polyfills it via the banner/define config
 const _filename = fileURLToPath(import.meta.url);

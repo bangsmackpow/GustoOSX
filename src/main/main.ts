@@ -1,8 +1,8 @@
 import { app, BrowserWindow, ipcMain, dialog } from "electron";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
-import { createDb } from "../db/index.js";
-import { hardwareService } from "./services/hardware.js";
+import { createDb } from "../db/index";
+import { hardwareService } from "./services/hardware";
 
 // Safe __dirname for both ESM and CJS
 const _filename = fileURLToPath(import.meta.url);
