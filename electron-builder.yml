@@ -1,0 +1,35 @@
+appId: com.gustoosx.app
+productName: GustoOSX
+directories:
+  output: dist/build
+  buildResources: build
+files:
+  - dist/main.cjs
+  - dist/public/**
+  - package.json
+extraResources:
+  - from: drizzle/migrations
+    to: migrations
+  - from: db/seeds
+    to: seeds
+mac:
+  target:
+    - target: dmg
+      arch:
+        - x64
+        - arm64
+  category: public.app-category.business
+  minimumSystemVersion: "12.0"
+  hardenedRuntime: true
+  gatekeeperAssess: false
+  entitlements: build/entitlements.mac.plist
+  entitlementsInherit: build/entitlements.mac.plist
+dmg:
+  sign: false
+  contents:
+    - x: 130
+      y: 220
+    - x: 410
+      y: 220
+      type: link
+      path: /Applications

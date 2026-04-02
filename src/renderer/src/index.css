@@ -1,0 +1,54 @@
+@import "tailwindcss";
+
+@theme {
+  --color-pos-bg: #0a0a0a;
+  --color-pos-surface: #141414;
+  --color-pos-surface-hover: #1a1a1a;
+  --color-pos-border: #2a2a2a;
+  --color-pos-accent: #f59e0b;
+  --color-pos-accent-hover: #d97706;
+  --color-pos-success: #10b981;
+  --color-pos-danger: #ef4444;
+  --color-pos-text: #f5f5f5;
+  --color-pos-text-muted: #737373;
+}
+
+* {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+input, textarea {
+  -webkit-user-select: auto;
+  user-select: auto;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Touch-friendly targets */
+button, [role="button"] {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Scrollbar styling for dark theme */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #141414;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #2a2a2a;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #3a3a3a;
+}
